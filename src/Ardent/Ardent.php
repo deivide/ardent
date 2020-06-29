@@ -423,7 +423,7 @@ abstract class Ardent extends Model {
 		}
 
 		if (is_null($foreignKey)) {
-			$foreignKey = snake_case($relation).'_id';
+			$foreignKey = Str::snake($relation).'_id';
 		}
 
 		// Once we have the foreign key names, we'll just create a new Eloquent query
@@ -457,7 +457,7 @@ abstract class Ardent extends Model {
 			$backtrace = debug_backtrace(false);
 			$caller = ($backtrace[1]['function'] == 'handleRelationalArray')? $backtrace[3] : $backtrace[1];
 
-			$name = snake_case($caller['function']);
+			$name = Str::snake($caller['function']);
 		}
 
 		// Next we will guess the type and ID if necessary. The type and IDs may also
@@ -481,7 +481,7 @@ abstract class Ardent extends Model {
         $attr = parent::getAttribute($key);
 
         if ($attr === null) {
-            $camelKey = camel_case($key);
+            $camelKey = Str::camel($key);
             if (array_key_exists($camelKey, static::$relationsData)) {
                 $this->relations[$key] = $this->$camelKey()->getResults();
                 return $this->relations[$key];
