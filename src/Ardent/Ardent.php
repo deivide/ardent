@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Hashing\BcryptHasher;
 use Illuminate\Support\MessageBag;
-use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Model;
@@ -77,7 +77,7 @@ abstract class Ardent extends Model {
     public static $throwOnFind = false;
 
     /**
-     * If set to true, the object will automatically populate model attributes from Input::all()
+     * If set to true, the object will automatically populate model attributes from Request::all()
      *
      * @var bool
      */
@@ -423,16 +423,16 @@ abstract class Ardent extends Model {
 		}
 
 		if (is_null($foreignKey)) {
-			$foreignKey = snake_case($relation).'_id';
+			$foreignKey = Str::snake($relation).'_id';
 		}
 
 		// Once we have the foreign key names, we'll just create a new Eloquent query
 		// for the related models and returns the relationship instance which will
 		// actually be responsible for retrieving and hydrating every relations.
 		$instance = new $related;
-		
+
 		$otherKey = $otherKey ?: $instance->getKeyName();
-		
+
 		$query = $instance->newQuery();
 
 		return new BelongsTo($query, $this, $foreignKey, $otherKey, $relation);
@@ -457,7 +457,7 @@ abstract class Ardent extends Model {
 			$backtrace = debug_backtrace(false);
 			$caller = ($backtrace[1]['function'] == 'handleRelationalArray')? $backtrace[3] : $backtrace[1];
 
-			$name = snake_case($caller['function']);
+			$name = Str::snake($caller['function']);
 		}
 
 		// Next we will guess the type and ID if necessary. The type and IDs may also
@@ -481,7 +481,7 @@ abstract class Ardent extends Model {
         $attr = parent::getAttribute($key);
 
         if ($attr === null) {
-            $camelKey = camel_case($key);
+            $camelKey = Str::camel($key);
             if (array_key_exists($camelKey, static::$relationsData)) {
                 $this->relations[$key] = $this->$camelKey()->getResults();
                 return $this->relations[$key];
@@ -506,7 +506,7 @@ abstract class Ardent extends Model {
 
         // Make this Capsule instance available globally via static methods
         $db->setAsGlobal();
-        
+
         $db->bootEloquent();
 
         $translator = new Translator($lang);
@@ -572,7 +572,7 @@ abstract class Ardent extends Model {
 			$customAttributes = (empty($customAttributes))? static::$customAttributes : $customAttributes;
 
 			if ($this->forceEntityHydrationFromInput || (empty($this->attributes) && $this->autoHydrateEntityFromInput)) {
-				$this->fill(Input::all());
+				$this->fill(Request::all());
 			}
 
 			$data = $this->getAttributes(); // the data under validation
@@ -591,8 +591,8 @@ abstract class Ardent extends Model {
 				$this->validationErrors = $this->validator->messages();
 
 				// stash the input to the current session
-				if (!self::$external && Input::hasSession()) {
-					Input::flash();
+				if (!self::$external && Request::hasSession()) {
+					Request::flash();
 				}
 			}
 		}
@@ -615,7 +615,7 @@ abstract class Ardent extends Model {
      * @param Closure $beforeSave
      * @param Closure $afterSave
      * @param bool    $force          Forces saving invalid data.
-     * 
+     *
      * @return bool
      * @see Ardent::save()
      * @see Ardent::forceSave()
@@ -829,7 +829,7 @@ abstract class Ardent extends Model {
      * @return array Rules with exclusions applied
      */
     public function buildUniqueExclusionRules(array $rules = array()) {
-      
+
         if (!count($rules))
           $rules = static::$rules;
 
@@ -876,7 +876,7 @@ abstract class Ardent extends Model {
                 }
             }
         }
-        
+
         return $rules;
     }
 
@@ -898,7 +898,7 @@ abstract class Ardent extends Model {
         Closure $afterSave = null
     ) {
         $rules = $this->buildUniqueExclusionRules($rules);
-        
+
         return $this->save($rules, $customMessages, $options, $beforeSave, $afterSave);
     }
 

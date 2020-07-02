@@ -8,7 +8,7 @@ Ardent
 [![Daily Downloads](https://poser.pugx.org/laravelbook/ardent/d/daily.png)](https://packagist.org/packages/laravelbook/ardent)
 
 
-Self-validating smart models for Laravel Framework 5's Eloquent ORM.
+Self-validating smart models for Laravel Framework 6's Eloquent ORM.
 
 Based on the Aware bundle for Laravel 3 by Colby Rabideau.
 
@@ -85,13 +85,13 @@ Route::post('register', function() {
             'password_confirmation' => 'required|min:6'
         );
 
-        $validator = Validator::make(Input::all(), $rules);
+        $validator = Validator::make(Request::all(), $rules);
 
         if ($validator->passes()) {
             User::create(array(
-                    'name'     => Input::get('name'),
-                    'email'    => Input::get('email'),
-                    'password' => Hash::make(Input::get('password'))
+                    'name'     => Request::get('name'),
+                    'email'    => Request::get('email'),
+                    'password' => Hash::make(Request::get('password'))
                 ));
 
             return Redirect::to('/')->with('message', 'Thanks for registering!');
@@ -118,7 +118,7 @@ Route::post('register', function() {
 );
 ```
 
-**Enter Ardent!** 
+**Enter Ardent!**
 
 **Ardent** - the magic-dust-powered, wrist-friendly, one-stop solution to all your dreary input sanitization boilerplates!
 
@@ -161,7 +161,7 @@ class User extends \LaravelArdent\Ardent\Ardent {
 }
 ```
 
-> **Note**: you're free to use the [array syntax](http://laravel.com/docs/5.0/validation#basic-usage) for validation rules as well. _I hope you don't mind the old Laravel docs link, but as good as Laravel documentation is, clear reference on pipe/array syntaxes for Validation rules is unfortunately gone since 5.1._
+> **Note**: you're free to use the [array syntax](http://laravel.com/docs/validation#basic-usage) for validation rules as well. _I hope you don't mind the old Laravel docs link, but as good as Laravel documentation is, clear reference on pipe/array syntaxes for Validation rules is unfortunately gone since 5.1._
 
 Ardent models validate themselves automatically when `Ardent->save()` is called.
 
@@ -248,7 +248,7 @@ class User extends \LaravelArdent\Ardent\Ardent {
     if($this->isDirty('password')) {
       $this->password = Hash::make($this->password);
     }
-    
+
     return true;
     //or don't return nothing, since only a boolean false will halt the operation
   }
@@ -309,21 +309,21 @@ or one of the related constants (`Ardent::HAS_MANY` or `Ardent::MORPH_ONE` for e
     - `foreignKey` [optional], valid for `hasOne`, `hasMany`, `belongsTo` and `belongsToMany`
     - `table`,`otherKey` [optional],`timestamps` [boolean, optional], and `pivotKeys` [array, optional], valid for `belongsToMany`
     - `name`, `type` and `id`, used by `morphTo`, `morphOne` and `morphMany` (the last two requires `name` to be defined)
-    
+
 > **Note:** This feature was based on the easy [relations on Yii 1.1 ActiveRecord](http://www.yiiframework.com/doc/guide/1.1/en/database.arr#declaring-relationship).
 
 
 ## Automatically Hydrate Ardent Entities
 
-Ardent is capable of hydrating your entity model class from the form input submission automatically! 
+Ardent is capable of hydrating your entity model class from the form input submission automatically!
 
 Let's see it action. Consider this snippet of code:
 
 ```php
 $user           = new User;
-$user->name     = Input::get('name');
-$user->email    = Input::get('email');
-$user->password = Hash::make(Input::get('password'));
+$user->name     = Request::get('name');
+$user->email    = Request::get('email');
+$user->password = Hash::make(Request::get('password'));
 $user->save();
 ```
 
@@ -336,7 +336,7 @@ $user->save();
 
 That's it! All we've done is remove the boring stuff.
 
-Believe it or not, the code above performs essentially the same task as its older, albeit rather verbose sibling. Ardent populates the model object with attributes from user submitted form data. No more hair-pulling trying to find out which Eloquent property you've forgotten to populate. Let Ardent take care of the boring stuff, while you get on with the fun stuffs!  
+Believe it or not, the code above performs essentially the same task as its older, albeit rather verbose sibling. Ardent populates the model object with attributes from user submitted form data. No more hair-pulling trying to find out which Eloquent property you've forgotten to populate. Let Ardent take care of the boring stuff, while you get on with the fun stuffs!
 It follows the same [mass assignment rules](http://laravel.com/docs/eloquent#mass-assignment) internally, depending on the `$fillable`/`$guarded` properties.
 
 To enable the auto-hydration feature, simply set the `$autoHydrateEntityFromInput` instance variable to `true` in your model class. However, to prevent filling pre-existent properties, if you want auto-hydration also for update scenarios, you should use instead `$forceEntityHydrationFromInput`:
