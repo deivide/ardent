@@ -1,4 +1,4 @@
-<?php namespace LaravelArdent\Providers\Ardent;
+<?php namespace LaravelArdent\Ardent\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
